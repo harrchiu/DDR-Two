@@ -1,22 +1,2 @@
-# q23m
-# q23m
-# q23m
-# q23m
-# ICS12
-# ICS12
-# ICS12
-# ICS12
-# ICS12
-# ICS12
-# ICS_12
-# ICS_12
-# ICS_12
-# ICS_12
-# ICS_12
-# ICS_12
-# ICS_12_rpg_summative
-# ICS_12_rpg_summative
-# AP_Physics_C
-# AP_Physics_C
-# AP_Physics_C
 # ICS_10_DDR_game
+Java Dance Dance Revolution (DDR) game for ICS2O3 summative.
