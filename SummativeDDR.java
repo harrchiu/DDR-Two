@@ -1,0 +1,655 @@
+/*Tom Liu, Harrison Chiu, Ryan Li, Eric S, Eric Z
+ Jan 23, 2018
+ ICS201-01
+ SummativeDDR  hi guys it's yo boy harry lmk if you see this
+ Make a Dance Dance Revolution (DDR) program.*/
+// The "SummativeDDR" class.
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import javax.swing.*;
+import sun.audio.*;
+import hsa.Console;
+import javax.imageio.*;
+import java.io.*;
+import java.util.Random;
+
+public class SummativeDDR
+{
+    static Console c;
+    static Graphics2D g;
+    static Random rand = new Random ();
+    public static AudioStream as = null;
+    
+    //*********************** Load Image ***************************
+    public static Image loadImage (String name)  //Loads image from file
+    {
+        Image img = null;
+        try
+        {
+            img = ImageIO.read (new File (name));
+        }
+        
+        catch (IOException e)
+        {
+        }
+        
+        return img;
+    }
+    
+    
+    //*********************** Sound Player ***************************
+    public static void Player (String audioname)  // Music method
+    {
+        InputStream in = null; // Readies input stream  for audio
+        
+        try
+        {
+            in = new FileInputStream (new File (audioname)); // for importing Files into FileInputStream
+        }
+        catch (FileNotFoundException e)
+        {
+        }
+        try
+        {
+            as = new AudioStream (in);
+        }
+        catch (IOException e)
+        {
+        }
+    }
+    
+    public static void sleep (int ms)  // sleep function
+    {
+        try
+        {
+            Thread.sleep (ms);
+        }catch (InterruptedException ie){}
+        
+    }
+    
+    //*********************** Eric S, Harrison - main game program ***************************
+    public static void checkEndState(int endedGameInfo[]){   // check end state of game, win or loss    
+        
+                
+        Image lostScreen = loadImage("lostBackground.png");
+        Image clearedScreen = loadImage("clearedBackground.png");
+        
+        Image aGrade = loadImage("aGrade.png");
+        Image bGrade = loadImage("bGrade.png");
+        Image cGrade = loadImage("cGrade.png");
+        Image dGrade = loadImage("dGrade.png");
+        Image sGrade = loadImage("sGrade.png");
+        
+        if (endedGameInfo[4] == 0){    // LOST -- show losing screen, print misses, hits, and max streak
+            c.drawImage(lostScreen, 0,0,null);
+            c.setColor(Color.red);
+            c.setFont(new Font("Comic Sans MS", Font.PLAIN, 45));  // set the font type and size     
+            
+            c.drawString(Integer.toString(endedGameInfo[0]), 138,204);
+            c.drawString(Integer.toString(endedGameInfo[2]), 169,248);                          
+            c.drawString(Integer.toString(endedGameInfo[3]), 248,290);
+            
+            try
+            {
+                AudioPlayer.player.stop(as);
+                Player ("losingHorn.wav");
+                AudioPlayer.player.start (as);  
+            }catch (Exception e){}
+        }
+        else if (endedGameInfo[4] == 1){ // WON -- show cleared screen, print points, hits, misses, and max streak (also grade)
+            c.drawImage(clearedScreen, 0,0,null);
+            c.setColor(Color.green);
+            c.setFont(new Font("Comic Sans MS", Font.PLAIN, 35));  // set the font type and size     
+            
+            int percentageHit =  100*endedGameInfo[0] / endedGameInfo[5]; // calculate percentage of on target hits
+
+            
+            c.drawString(Integer.toString(endedGameInfo[1]), 166,187);
+            c.drawString(Integer.toString(endedGameInfo[0]) + " (" + Integer.toString(percentageHit) + "%)", 135,231);                          
+            c.drawString(Integer.toString(endedGameInfo[2]), 168,275);
+            c.drawString(Integer.toString(endedGameInfo[3]), 250,317);
+            
+            int overallPercentage = 100*(endedGameInfo[0] - endedGameInfo[2])/(endedGameInfo[0]);  // calculate percentage using combo of hits and misses
+            
+            if (overallPercentage >= 95){   // print the corresponding grade (THIS IS IN SET 7 RIGHT wow!)
+                c.drawImage(sGrade, 380,40,null);
+            }
+            else if (overallPercentage >= 90){
+                c.drawImage(aGrade, 345,30,null);
+            }
+            else if (overallPercentage >= 80){
+                c.drawImage(bGrade, 350,35,null);
+            }
+            else if (overallPercentage >= 50){
+                c.drawImage(cGrade, 340,40,null);
+            }
+            else {
+                c.drawImage(dGrade, 300,40,null);
+            }
+
+            try
+            {
+                AudioPlayer.player.stop (as);
+                Player ("applause.wav");
+                AudioPlayer.player.start (as);  
+            }catch (Exception e){}
+        }              
+    }
+    
+    //*******************************MAIN Method****************************
+    //*********************** Ryan, Tom, Eric Z - menu and transitioning parts ***************************
+    
+    public static int[] startGame (int sleepDuration, int baseYInterval, int fluctuatingYRange, int arrowAmount, int gameInfo[])  // Music method
+    {
+        
+
+
+        BufferedImage image = new BufferedImage (640, 480, BufferedImage.TYPE_INT_ARGB); //BufferedImage
+        g = image.createGraphics (); //Graphics2D
+        
+        
+        c.setFont(new Font("Comic Sans MS", Font.PLAIN, 200));  // set the font type and size       
+        
+        Image background = loadImage("ddrBackground.png");
+        
+        char ch;
+        
+        int perfectYCoor = 45;
+        int score = 0;
+        
+        int xCoordinates[], yCoordinates[];
+        xCoordinates = new int[arrowAmount];
+        yCoordinates = new int[arrowAmount];
+        
+        int arrowXPositions[] = new int[4];   // exact x coordinates of each arrow lane/column/strip
+        arrowXPositions[0] = 2;
+        arrowXPositions[1] = 70;
+        arrowXPositions[2] = 138;
+        arrowXPositions[3] = 204;
+        
+        
+        
+        for (int q = 0; q < yCoordinates.length; q ++){
+            
+            xCoordinates[q] = arrowXPositions[rand.nextInt(4)];
+            yCoordinates[q] = 600 + baseYInterval*q + rand.nextInt(fluctuatingYRange);
+        }
+ 
+        
+        g.setFont(new Font("Comic Sans MS", Font.PLAIN, 40));  // set the font type and size
+        
+        int streak = 0;
+        
+        int streakGameOverThreshold = -5;
+        
+        int currentIndex = 0;
+        int maxCap = 0;
+
+        
+        int misses = 0;
+        int hits = 0;
+        int highestStreak = 0;
+
+        
+        int goodFlyingStringCoor = -500;
+        
+        boolean isFlyingTrue = false;
+        
+        String commentList[] = 
+            new String [5];
+        commentList[0] = "wooooooooow";
+        commentList[1] = "SUCCCCCULENT";
+        commentList[2] = "fast fingers";
+        commentList[3] = "tom would be proud";
+        commentList[4] = "add up ig @q23m";
+        String currentString = "asdhfsjdflasdkfj";
+        while (true){
+            
+            while (!c.isCharAvail()){   
+                
+                
+                g.drawImage(background, 0, 0, null);  // display background
+                
+                
+                g.setColor(new Color(50,255,50));
+                
+                
+                if (streak > 50){
+                    g.setColor(new Color(rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)));  // different colours for different streak combos
+                    if (isFlyingTrue == false){
+                        if (rand.nextInt(15) == rand.nextInt(15)){
+                            goodFlyingStringCoor = -500;
+                            isFlyingTrue = true;
+                            
+                            currentString = commentList[rand.nextInt(5)];
+                        }
+                    }
+                    else {
+                        goodFlyingStringCoor ++;
+                        g.setFont(new Font("Comic Sans MS", Font.PLAIN, 60));  // set the font type and size
+                        g.drawString(currentString, goodFlyingStringCoor, 300);
+                        if (goodFlyingStringCoor > 640){
+                            isFlyingTrue = false;
+                        }
+                    }
+                }
+                else if (streak > 25){
+                    g.setColor(Color.yellow);
+
+                }
+                else if (streak > 10){
+                    g.setColor(Color.black);
+
+                }
+                else if (streak > 5){
+                    g.setColor(Color.red);
+                    goodFlyingStringCoor = 0;
+                }
+                
+                else if (streak <-2){
+                    g.setColor(new Color(rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)));
+                }
+
+                
+                
+                g.setFont(new Font("Comic Sans MS", Font.PLAIN, 40));  // set the font type and size
+                g.drawString("Score: " + Integer.toString(score), 300,75);  // print score and streak
+                g.drawString("Streak: " + Integer.toString(streak), 300,125);
+                
+                
+                for (int x = 0; x < yCoordinates.length; x ++){   // shift all arrows
+                    yCoordinates[x] -= 5;
+                }
+                
+                if (currentIndex + 50 > yCoordinates.length){   // find the maximum cap so it doesn't surpass list length
+                    maxCap = yCoordinates.length;
+                }
+                else{
+                    maxCap = currentIndex + 50;
+                }
+                
+                
+                for (int x = currentIndex; x < maxCap; x ++){
+                    
+                    //arrow currently loading (shifted by arrowIndex)
+                    
+                    if ((yCoordinates[x] < (perfectYCoor - 65)) && (yCoordinates[x] > -1000)){   // arrow passes off screen
+                        
+                        score -= 100;
+                        
+                        yCoordinates[x] = -1000;
+                        
+                        currentIndex ++;
+
+                        
+                        misses += 1;
+                        goodFlyingStringCoor = -500;
+                        isFlyingTrue = false;
+                        if (streak <= 0){
+                            streak -= 1;
+                            if (streak == streakGameOverThreshold){    //GAME OVER - LOST
+                                gameInfo = new int[6];
+                                gameInfo[0] = hits;
+                                gameInfo[1] = score;
+                                gameInfo[2] = misses;
+                                gameInfo[3] = highestStreak;
+                                gameInfo[4] = 0; // 0 means lost
+                                gameInfo[5] = arrowAmount;
+                    
+                                
+                            
+                                return gameInfo;
+
+                            }
+                        }
+                        else{
+                            streak = 0;
+                        }
+
+                        
+                    }
+                    
+                    
+                    if (xCoordinates[x] == arrowXPositions[0]){
+                        g.drawImage(loadImage("leftArrow.png"), xCoordinates[x], yCoordinates[x], null);   // print according arrow
+                    }
+                    else if (xCoordinates[x] == arrowXPositions[1]){
+                        g.drawImage(loadImage("downArrow.png"), xCoordinates[x], yCoordinates[x], null);
+                    }
+                    else if (xCoordinates[x] == arrowXPositions[2]){
+                        g.drawImage(loadImage("upArrow.png"), xCoordinates[x], yCoordinates[x], null);
+                    }
+                    else if (xCoordinates[x] == arrowXPositions[3]){
+                        g.drawImage(loadImage("rightArrow.png"), xCoordinates[x], yCoordinates[x], null);
+                        
+                        //print the corresponding orientation of the arrows, in the correct column, with the yCoordinate
+                    }
+                }
+                c.drawImage(image, 0, 0, null);
+                sleep(sleepDuration);
+                
+                if (yCoordinates[yCoordinates.length-1] <= -1000){   // check if this last arrow is off screen - the player wins
+                    gameInfo = new int[6];
+                    gameInfo[0] = hits;
+                    gameInfo[1] = score;
+                    gameInfo[2] = misses;
+                    gameInfo[3] = highestStreak;
+                    gameInfo[4] = 1; // 1 means won
+                    gameInfo[5] = arrowAmount;
+                    return gameInfo;
+                }  
+            }
+
+            ch = c.getChar();    // char has been pressed, break out of loop, check where arrows are in list
+
+            for (int q = 0; q < yCoordinates.length; q ++){
+
+                
+                if (yCoordinates[q] > (perfectYCoor-65) && yCoordinates[q] < (perfectYCoor+65)){  // inside y range of box
+                    
+                    if (ch == 'j' && xCoordinates[q] == arrowXPositions[0]){   // key corresponds to x-value of arrow
+                        
+                        // calculate difference between ycoordinate and perfect placement - 100 max -- 
+                        score += 100 - 100*Math.abs(perfectYCoor - yCoordinates[q])/65;
+                    }
+                    else if (ch == 'k' && xCoordinates[q] == arrowXPositions[1]){
+                        score += 100 - 100*Math.abs(perfectYCoor - yCoordinates[q])/65;
+                    }
+                    else if (ch == 'i' && xCoordinates[q] == arrowXPositions[2]){
+                        score += 100 - 100*Math.abs(perfectYCoor - yCoordinates[q])/65;
+                    }
+                    else if (ch == 'l' && xCoordinates[q] == arrowXPositions[3]){
+                        score += 100 - 100*Math.abs(perfectYCoor - yCoordinates[q])/65;
+                    }
+                    
+                    else{
+                        continue;  // if invalid key or untimed press, check arrow. won't displace the arrow below
+                    }
+                    
+                    streak ++;
+                    hits ++;
+                    if (streak > highestStreak){
+                        highestStreak = streak;
+                    }
+                    yCoordinates[q] = -1000;   // place the arrow off screen -- remove from list later
+                    currentIndex ++;
+                    
+                    if (yCoordinates[yCoordinates.length-1] <= -1000){   // check if this last arrow is off screen - the player wins
+                        gameInfo = new int[6];
+                        gameInfo[0] = hits;
+                        gameInfo[1] = score;
+                        gameInfo[2] = misses;
+                        gameInfo[3] = highestStreak;
+                        gameInfo[4] = 1; // 1 means won
+                        gameInfo[5] = arrowAmount;
+                        return gameInfo;
+                    }
+                    break;
+                }   
+                
+                else if (yCoordinates[q] > (perfectYCoor+65)){  // underneath y range of box but key is pressed
+                    
+                    if (ch == 'j' || ch == 'i' || ch == 'k' || ch == 'l'   ){   // key corresponds to x-value of arrow
+                        // deduct 100 pts if pressed one of four keys
+                        score -= 100;
+                    }
+                    else{
+                        continue;  // if invalid key, check arrow. won't displace the arrow below
+                    }
+                    
+                    // yCoordinates[q] = -1000;   // place the arrow off screen -- remove from list later
+                    misses += 1;
+                    goodFlyingStringCoor = -500;
+                    isFlyingTrue = false;
+                    if (streak <= 0){
+                        streak -= 1;
+                        if (streak == streakGameOverThreshold){    //GAME OVER
+                                gameInfo = new int[6];
+                                gameInfo[0] = hits;
+                                gameInfo[1] = score;
+                                gameInfo[2] = misses;
+                                gameInfo[3] = highestStreak;
+                                gameInfo[4] = 0; // 0 means lost
+                                gameInfo[5] = arrowAmount;
+                                return gameInfo;
+
+                            }
+                    }
+                    else{
+                        streak = 0;
+                    }
+
+                    break;
+                }      
+                
+            }
+            
+            
+            
+            
+            
+        }
+        
+    }
+    
+    
+    
+    public static void main (String[] args)
+    { 
+        c = new Console ();
+         
+        //Loading images
+        // Image loadingscreen = loadImage ("loadingscreen.png");
+        Image MainTest1 = loadImage ("MainTest1.png");
+        Image MainTest2 = loadImage ("MainTest2.png");
+        Image SelectTest1 = loadImage ("SelectTest1.png");
+        Image SelectTest2 = loadImage ("SelectTest2.png");
+        Image SelectTest3 = loadImage ("SelectTest3.png");
+        Image SelectTest4 = loadImage ("SelectTest4.png");
+        Image SelectTest5 = loadImage ("SelectTest5.png");
+
+        //Array for Selection Screen
+        Image SelectTests[] = new Image [5];
+        SelectTests [0] = SelectTest1;
+        SelectTests [1] = SelectTest2;
+        SelectTests [2] = SelectTest3;
+        SelectTests [3] = SelectTest4;
+        SelectTests [4] = SelectTest5;
+        
+
+        
+        int endedGameInfo[] = new int[6];
+        
+        //Control interface for main menu
+        char choice1,save,choice4;
+        while (true)
+        {
+             boolean breakOutTwice = false;
+             BufferedImage image = new BufferedImage (640, 375, BufferedImage.TYPE_INT_ARGB);
+             g = image.createGraphics ();
+
+            //Draw Main menu
+
+            AudioPlayer.player.stop (as);
+            try
+            {
+                Player ("ThemeMusic.wav");
+                AudioPlayer.player.start (as);
+            }catch (Exception e){}
+            
+            g.drawImage (MainTest1, 0, 0, 640, 480, null);   // draw main screen, option one highlighted
+            c.drawImage (image, 0, 0, null);       
+            
+            choice1 = 'i';
+            save = 'i'; 
+            choice4 = 'e';
+            
+            do
+            {
+
+                choice1 = c.getChar ();
+                if (choice1 == 'i' || choice1 == 'I')
+                {
+                    g.drawImage (MainTest1, 0, 0, 640, 480, null);    // draw main screen, option one highlighted
+                    c.drawImage (image, 0, 0, null);
+                    save = choice1;
+                }
+                else
+                    if (choice1 == 'k' || choice1 == 'K')
+                {
+                    g.drawImage (MainTest2, 0, 0, 640, 480, null);    // draw main screen, option two highlighted
+                    c.drawImage (image, 0, 0, null);
+                    save = choice1;
+                }
+            }
+            
+            while (choice1 != ' ');   // continue on if selected character is a space
+            
+            
+            if (save == 'i' || save == 'I')
+            {
+                int a;
+                
+                a = 1;
+
+                g.drawImage (SelectTest1, 0, 0, 640, 375, null);
+                c.drawImage (image, 0, 0, null);
+                
+                do  // await input from user, change who is selected according to key, and last index of selction
+                {
+                    choice4 = c.getChar ();
+                    if (choice4 == 'j' || choice4 == 'J')
+                    {
+                        if (a > 1)
+                        {
+                            a--;
+                        }
+                        else
+                            if (a == 1)
+                        {
+                            a = 5;
+                        }
+                    }
+                    else
+                        if (choice4 == 'l' || choice4 == 'L')
+                    {
+                        if (a < 5)
+                        {
+                            a++;
+                        }
+                        else
+                            if (a == 5)
+                        {
+                            a = 1;
+                        }
+                    }
+                    else
+                        if (choice4 == 'q' || choice4 == 'Q')
+                    {
+                        breakOutTwice = true;
+                        break;
+                        
+                    }
+                    
+                    g.drawImage (SelectTests [a - 1], 0, 0, 640, 375, null);
+                    c.drawImage (image, 0, 0, null);
+                }
+                while (choice4 != ' '); //  pressing space starts the game (breaks out of loop and goes below)
+                
+                
+                if (breakOutTwice == true){
+                    breakOutTwice = false;
+                    continue;
+                }
+                
+                
+                AudioPlayer.player.stop (as);   // a is set from different keys changing the value in the loop prior
+                if (a == 1)   // see what a matches, start the game play for the corresponding game/song
+                {
+                    //Harry's song
+                    try
+                    {
+                        Player ("HarrySong.wav");
+                        AudioPlayer.player.start (as);  // play designated music
+                    }catch (Exception e){}
+                    
+                    endedGameInfo = startGame(20, 50, 1, 100, endedGameInfo);// sleepTime, baseYinterval, random range added to y, amount of arrows
+                    checkEndState(endedGameInfo);   // check for win or loss and act accordingly
+                }
+                else if (a == 2)
+                {
+                    //Ryan's song
+                    try
+                    {
+                        Player ("RyanSong.wav");
+                        AudioPlayer.player.start (as);
+                    }catch (Exception e){}
+                    endedGameInfo = startGame(20, 40, 20, 300, endedGameInfo);
+                    checkEndState(endedGameInfo);
+                }
+                else if (a == 3)
+                {
+                    //Tom's song
+                    try
+                    {
+                        Player ("TomSong.wav");
+                        AudioPlayer.player.start (as);
+                    }catch (Exception e){}
+                    
+                    endedGameInfo = startGame(20, 35, 40, 500, endedGameInfo);
+                    checkEndState(endedGameInfo);
+                }
+                else if (a == 4)
+                {
+                    //Eric S's song
+                    try
+                    {
+                        Player ("EricSSong.wav");
+                        AudioPlayer.player.start (as);
+                    }catch (Exception e){}
+                    
+                    endedGameInfo = startGame(15, 25, 50, 500, endedGameInfo);
+                    checkEndState(endedGameInfo);
+                }
+                else if (a == 5)
+                {
+                    //Eric Z's song
+                    try
+                    {
+                        Player ("EricZSong.wav");
+                        AudioPlayer.player.start (as);
+                    }catch (Exception e){}
+                    
+                    endedGameInfo = startGame(15, 15, 30, 500, endedGameInfo);
+                    checkEndState(endedGameInfo);
+                    
+                }
+                
+                char promptCh = 'e';
+                while (promptCh != ' '){
+                    promptCh = c.getChar ();   // prompt until space is entered
+                }
+
+                continue;
+
+                
+            }
+            
+            
+            else if (save == 'k' || save == 'K')
+            {
+                c.drawImage(loadImage("instructionScreen.png"),0,0,null);
+               
+                c.getChar();
+            }
+
+        } // while (true)
+        
+        
+        
+
+    } // main method
+} // Summative2 class
+
+

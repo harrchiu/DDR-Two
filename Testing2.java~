@@ -1,0 +1,273 @@
+/*Tom Liu
+,2017
+ICS201-01
+Summative2
+Put the description of your program here.*/
+// The "Summative2" class.
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import javax.swing.*;
+import sun.audio.*;
+import hsa.Console;
+import javax.imageio.*;
+import java.io.*;
+import java.util.Random;
+
+public class Testing2
+{
+    static Console c;
+    static Graphics2D graphics;
+    public static AudioStream as = null;
+
+    //*********************** Load Image ***************************
+    public static Image loadImage (String name)  //Loads image from file
+    {
+	Image img = null;
+	try
+	{
+	    img = ImageIO.read (new File (name));
+	}
+
+	catch (IOException e)
+	{
+	}
+
+	return img;
+    }
+
+
+    //*********************** Sound Player ***************************
+    public static void Player (String audioname)  // Music method
+    {
+	InputStream in = null; // Readies input stream  for audio
+
+	try
+	{
+	    in = new FileInputStream (new File (audioname)); // for importing Files into FileInputStream
+	}
+	catch (FileNotFoundException e)
+	{
+	}
+	try
+	{
+	    as = new AudioStream (in);
+	}
+	catch (IOException e)
+	{
+	}
+    }
+
+
+    //*******************************MAIN Method****************************
+
+    public static void main (String[] args)
+    {
+	c = new Console ();
+
+	BufferedImage image = new BufferedImage (640, 480, BufferedImage.TYPE_INT_ARGB);
+	graphics = image.createGraphics ();
+
+	//Loading images
+	// Image loadingscreen = loadImage ("loadingscreen.png");
+	Image MainTest1 = loadImage ("MainTest1.png");
+	Image MainTest2 = loadImage ("MainTest2.png");
+	Image SelectTest1 = loadImage ("SelectTest1.png");
+	Image SelectTest2 = loadImage ("SelectTest2.png");
+	Image SelectTest3 = loadImage ("SelectTest3.png");
+	Image SelectTest4 = loadImage ("SelectTest4.png");
+	Image SelectTest5 = loadImage ("SelectTest5.png");
+
+	//Array for Selection Screen
+	Image SelectTests[] = new Image [5];
+	SelectTests [0] = SelectTest1;
+	SelectTests [1] = SelectTest2;
+	SelectTests [2] = SelectTest3;
+	SelectTests [3] = SelectTest4;
+	SelectTests [4] = SelectTest5;
+
+	//Draw Main menu
+	graphics.drawImage (MainTest1, 0, 0, 640, 480, null);
+	c.drawImage (image, 0, 0, null);
+
+	//Control interface for main menu
+	while (true)
+	{
+	    AudioPlayer.player.stop (as);
+	    try
+	    {
+		Player ("ThemeMusic.wav");
+		AudioPlayer.player.start (as);
+	    }
+	    catch (Exception e)
+	    {
+	    }
+
+	    graphics.drawImage (MainTest1, 0, 0, 640, 480, null);
+	    c.drawImage (image, 0, 0, null);
+
+	    char choice1 = 'i', save = 'i';
+
+	    do
+	    {
+		choice1 = c.getChar ();
+		if (choice1 == 'i' || choice1 == 'I')
+		{
+		    graphics.drawImage (MainTest1, 0, 0, 640, 480, null);
+		    c.drawImage (image, 0, 0, null);
+		    save = choice1;
+		}
+		else
+		    if (choice1 == 'k' || choice1 == 'K')
+		    {
+			graphics.drawImage (MainTest2, 0, 0, 640, 480, null);
+			c.drawImage (image, 0, 0, null);
+			save = choice1;
+		    }
+	    }
+	    while (choice1 != ' ');
+
+	    char choice4;
+
+	    if (save == 'i' || save == 'I')
+	    {
+		int a;
+
+		a = 1;
+		c.clear ();
+		graphics.drawImage (SelectTest1, 0, 0, 640, 480, null);
+		c.drawImage (image, 0, 0, null);
+		do
+		{
+		    choice4 = c.getChar ();
+		    if (choice4 == 'j' || choice4 == 'J')
+		    {
+			if (a > 1)
+			{
+			    a--;
+			}
+			else
+			    if (a == 1)
+			    {
+				a = 5;
+			    }
+		    }
+		    else
+			if (choice4 == 'l' || choice4 == 'L')
+			{
+			    if (a < 5)
+			    {
+				a++;
+			    }
+			    else
+				if (a == 5)
+				{
+				    a = 1;
+				}
+			}
+			else
+			    if (choice4 == 'q' || choice4 == 'Q')
+			    {
+				break;
+			    }
+
+		    graphics.drawImage (SelectTests [a - 1], 0, 0, 640, 480, null);
+		    c.drawImage (image, 0, 0, null);
+		}
+		while (choice4 != ' '); //SelectTests screen
+
+
+		while (choice4 != 'q' && choice4 != 'Q')
+		{
+		    c.clear ();
+		    c.println ("End of demo. Press q to go back.");
+		    AudioPlayer.player.stop (as);
+		    if (a == 1)
+		    {
+		    //Harry's song
+			try
+			{
+			    Player ("HarrySong.wav");
+			    AudioPlayer.player.start (as);
+			}
+			catch (Exception e)
+			{
+			}
+			//Game code
+		    }
+		    else
+			if (a == 2)
+			{
+			//Ryan's song
+			    try
+			    {
+				Player ("RyanSong.wav");
+				AudioPlayer.player.start (as);
+			    }
+			    catch (Exception e)
+			    {
+			    }
+			    //Game code
+			}
+			else
+			    if (a == 3)
+			    {
+			    //Tom's song
+				try
+				{
+				    Player ("TomSong.wav");
+				    AudioPlayer.player.start (as);
+				}
+				catch (Exception e)
+				{
+				}
+				//Game code
+			    }
+			    else
+				if (a == 4)
+				{
+				//Eric S's song
+				    try
+				    {
+					Player ("EricSSong.wav");
+					AudioPlayer.player.start (as);
+				    }
+				    catch (Exception e)
+				    {
+				    }
+				    //Game code
+				}
+				else
+				    if (a == 5)
+				    {
+				    //Eric Z's song
+					try
+					{
+					    Player ("EricZSong.wav");
+					    AudioPlayer.player.start (as);
+					}
+					catch (Exception e)
+					{
+					}
+					//Game code
+				    }
+		    choice4 = c.getChar ();
+		}
+	    }
+	    else
+		if (save == 'k' || save == 'K')
+		{
+		    c.clear ();
+		    c.println ("Just try all the buttons.");
+		    do
+		    {
+			choice4 = c.getChar ();
+			//graphics.drawImage (SelectTests [a - 1], 0, 0, 640, 480, null);
+			//c.drawImage (image, 0, 0, null);
+		    }
+		    while (choice4 != ' ' && choice4 != 'q' && choice4 != 'Q'); //Main Screen
+		}
+	} // while (true)
+    } // main method
+} // Summative2 class
+
+
