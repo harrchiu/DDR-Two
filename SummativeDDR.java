@@ -1,4 +1,4 @@
-/*Tom Liu, Harrison Chiu, Ryan Li, Eric S, Eric Z
+/*Harrison Chiu, Ryan Li, Tom Liu, Eric S, Eric Z
  Jan 23, 2018
  ICS201-01
  SummativeDDR  hi guys it's yo boy harry lmk if you see this
@@ -68,7 +68,6 @@ public class SummativeDDR
         
     }
     
-    //*********************** Eric S, Harrison - main game program ***************************
     public static void checkEndState(int endedGameInfo[]){   // check end state of game, win or loss    
         
                 
@@ -137,13 +136,9 @@ public class SummativeDDR
         }              
     }
     
-    //*******************************MAIN Method****************************
-    //*********************** Ryan, Tom, Eric Z - menu and transitioning parts ***************************
     
     public static int[] startGame (int sleepDuration, int baseYInterval, int fluctuatingYRange, int arrowAmount, int gameInfo[])  // Music method
     {
-        
-
 
         BufferedImage image = new BufferedImage (640, 480, BufferedImage.TYPE_INT_ARGB); //BufferedImage
         g = image.createGraphics (); //Graphics2D
@@ -202,7 +197,7 @@ public class SummativeDDR
         commentList[1] = "SUCCCCCULENT";
         commentList[2] = "fast fingers";
         commentList[3] = "tom would be proud";
-        commentList[4] = "add up ig @q23m";
+        commentList[4] = "add up ig @hdotchiu";
         String currentString = "asdhfsjdflasdkfj";
         while (true){
             
@@ -433,11 +428,9 @@ public class SummativeDDR
         
     }
     
-    
-    
     public static void main (String[] args)
     { 
-        c = new Console ();
+        c = System.console();//new Console ();
          
         //Loading images
         // Image loadingscreen = loadImage ("loadingscreen.png");
