@@ -1,2 +1,3 @@
-# ICS_10_DDR_game
-Java Dance Dance Revolution (DDR) game for ICS2O3 summative.
+# Dance Dance Revolution (DDR)
+
+DDR game written in Java for ICS2O3 summative.
